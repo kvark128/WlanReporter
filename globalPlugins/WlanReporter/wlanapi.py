@@ -16,6 +16,9 @@ WLAN_AVAILABLE_NETWORK_CONNECTED = 1
 # State of the interface
 wlan_interface_state_connected = 1
 
+# General reason codes
+WLAN_REASON_CODE_SUCCESS = 0
+
 # Return codes
 ERROR_SUCCESS = 0
 

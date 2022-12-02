@@ -18,7 +18,7 @@ addonHandler.initTranslation()
 def message(text, fileName):
 	ui.message(text)
 	path = os.path.join(MODULE_DIR, fileName)
-	if os.path.exists(path):
+	if os.path.isfile(path):
 		winsound.PlaySound(path, winsound.SND_ASYNC)
 
 @wlanapi.WLAN_NOTIFICATION_CALLBACK
@@ -26,11 +26,14 @@ def notifyHandler(pData, pCtx):
 	if pData.contents.NotificationSource != wlanapi.WLAN_NOTIFICATION_SOURCE_ACM:
 		return
 	if pData.contents.NotificationCode == wlanapi.wlan_notification_acm_connection_complete:
-		ssid = wlanapi.WLAN_CONNECTION_NOTIFICATION_DATA.from_address(pData.contents.pData).dot11Ssid.SSID
-		queueHandler.queueFunction(queueHandler.eventQueue, message, _("Connected to {ssid}").format(ssid=ssid.decode("utf-8")), "connect.wav")
+		notificationData = wlanapi.WLAN_CONNECTION_NOTIFICATION_DATA.from_address(pData.contents.pData)
+		if notificationData.wlanReasonCode == wlanapi.WLAN_REASON_CODE_SUCCESS:
+			text = _("Connected to {ssid}").format(ssid=notificationData.dot11Ssid.SSID.decode("utf-8"))
+			queueHandler.queueFunction(queueHandler.eventQueue, message, text, "connect.wav")
 	elif pData.contents.NotificationCode == wlanapi.wlan_notification_acm_disconnected:
-		ssid = wlanapi.WLAN_CONNECTION_NOTIFICATION_DATA.from_address(pData.contents.pData).dot11Ssid.SSID
-		queueHandler.queueFunction(queueHandler.eventQueue, message, _("Disconnected from {ssid}").format(ssid=ssid.decode("utf-8")), "disconnect.wav")
+		notificationData = wlanapi.WLAN_CONNECTION_NOTIFICATION_DATA.from_address(pData.contents.pData)
+		text = _("Disconnected from {ssid}").format(ssid=notificationData.dot11Ssid.SSID.decode("utf-8"))
+		queueHandler.queueFunction(queueHandler.eventQueue, message, text, "disconnect.wav")
 	elif pData.contents.NotificationCode == wlanapi.wlan_notification_acm_interface_arrival:
 		queueHandler.queueFunction(queueHandler.eventQueue, message, _("A wireless device has been enabled"), "connect.wav")
 	elif pData.contents.NotificationCode == wlanapi.wlan_notification_acm_interface_removal:
