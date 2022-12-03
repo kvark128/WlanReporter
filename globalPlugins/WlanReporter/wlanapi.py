@@ -1,9 +1,10 @@
+# Copyright (C) 2019-2022 Alexander Linkov <kvark128@yandex.ru>
+
 from comtypes import GUID
 from ctypes import *
 from ctypes.wintypes import DWORD, PDWORD, HANDLE, BOOL
 
-wlanapi = windll.wlanapi
-
+# Notification constants
 WLAN_NOTIFICATION_SOURCE_ALL = 0x0000ffff
 WLAN_NOTIFICATION_SOURCE_ACM = 0x00000008
 wlan_notification_acm_connection_complete = 0x0000000a
@@ -111,42 +112,45 @@ def errcheck(result, func, args):
 		raise WinError(c_long(result).value)
 	return result
 
+# Function prototypes from wlanapi.dll
+wlanapi = windll.wlanapi
+wlanapi.WlanOpenHandle.errcheck = errcheck
+wlanapi.WlanOpenHandle.argtypes = [DWORD, c_void_p, POINTER(DWORD), POINTER(HANDLE)]
+wlanapi.WlanOpenHandle.restype = DWORD
+wlanapi.WlanEnumInterfaces.errcheck = errcheck
+wlanapi.WlanEnumInterfaces.argtypes = [HANDLE, c_void_p, POINTER(POINTER(WLAN_INTERFACE_INFO_LIST))]
+wlanapi.WlanEnumInterfaces.restype = DWORD
+wlanapi.WlanGetAvailableNetworkList.errcheck = errcheck
+wlanapi.WlanGetAvailableNetworkList.argtypes = [HANDLE, POINTER(GUID), DWORD, c_void_p, POINTER(POINTER(WLAN_AVAILABLE_NETWORK_LIST))]
+wlanapi.WlanGetAvailableNetworkList.restype = DWORD
+wlanapi.WlanFreeMemory.argtypes = [c_void_p]
+wlanapi.WlanCloseHandle.errcheck = errcheck
+wlanapi.WlanCloseHandle.argtypes = [HANDLE, c_void_p]
+wlanapi.WlanCloseHandle.restype = DWORD
+wlanapi.WlanRegisterNotification.errcheck = errcheck
+wlanapi.WlanRegisterNotification.argtypes = [HANDLE, DWORD, BOOL, WLAN_NOTIFICATION_CALLBACK, c_void_p, c_void_p, PDWORD]
+wlanapi.WlanRegisterNotification.restype = DWORD
+
 def WlanOpenHandle(dwClientVersion, pReserved, pdwNegotiatedVersion, phClientHandle):
 	""" The WlanOpenHandle function opens a connection to the server. """
-	wlanapi.WlanOpenHandle.errcheck = errcheck
-	wlanapi.WlanOpenHandle.argtypes = [DWORD, c_void_p, POINTER(DWORD), POINTER(HANDLE)]
-	wlanapi.WlanOpenHandle.restype = DWORD
 	return wlanapi.WlanOpenHandle(dwClientVersion, pReserved, pdwNegotiatedVersion, phClientHandle)
 
 def WlanEnumInterfaces(hClientHandle, pReserved, ppInterfaceList):
 	""" The WlanEnumInterfaces function enumerates all of the wireless LAN interfaces currently enabled on the local computer. """
-	wlanapi.WlanEnumInterfaces.errcheck = errcheck
-	wlanapi.WlanEnumInterfaces.argtypes = [HANDLE, c_void_p, POINTER(POINTER(WLAN_INTERFACE_INFO_LIST))]
-	wlanapi.WlanEnumInterfaces.restype = DWORD
 	return wlanapi.WlanEnumInterfaces(hClientHandle, pReserved, ppInterfaceList)
 
 def WlanGetAvailableNetworkList(hClientHandle, pInterfaceGuid, dwFlags, pReserved, ppAvailableNetworkList):
 	""" The WlanGetAvailableNetworkList function retrieves the list of available networks on a wireless LAN interface. """
-	wlanapi.WlanGetAvailableNetworkList.errcheck = errcheck
-	wlanapi.WlanGetAvailableNetworkList.argtypes = [HANDLE, POINTER(GUID), DWORD, c_void_p, POINTER(POINTER(WLAN_AVAILABLE_NETWORK_LIST))]
-	wlanapi.WlanGetAvailableNetworkList.restype = DWORD
 	return wlanapi.WlanGetAvailableNetworkList(hClientHandle, pInterfaceGuid, dwFlags, pReserved, ppAvailableNetworkList)
 
 def WlanFreeMemory(pMemory):
 	""" The WlanFreeMemory function frees memory. Any memory returned from Native Wifi functions must be freed. """
-	wlanapi.WlanFreeMemory.argtypes = [c_void_p]
 	wlanapi.WlanFreeMemory(pMemory)
 
 def WlanCloseHandle(hClientHandle, pReserved):
 	""" The WlanCloseHandle function closes a connection to the server. """
-	wlanapi.WlanCloseHandle.errcheck = errcheck
-	wlanapi.WlanCloseHandle.argtypes = [HANDLE, c_void_p]
-	wlanapi.WlanCloseHandle.restype = DWORD
 	return wlanapi.WlanCloseHandle(hClientHandle, pReserved)
 
 def WlanRegisterNotification(hClientHandle, dwNotifSource, bIgnoreDuplicate, funcCallback, pCallbackContext, pReserved, pdwPrevNotifSource):
 	""" The WlanRegisterNotification function is used to register and unregister notifications on all wireless interfaces. """
-	wlanapi.WlanRegisterNotification.errcheck = errcheck
-	wlanapi.WlanRegisterNotification.argtypes = [HANDLE, DWORD, BOOL, WLAN_NOTIFICATION_CALLBACK, c_void_p, c_void_p, PDWORD]
-	wlanapi.WlanRegisterNotification.restype = DWORD
 	return wlanapi.WlanRegisterNotification(hClientHandle, dwNotifSource, bIgnoreDuplicate, funcCallback, pCallbackContext, pReserved, pdwPrevNotifSource)

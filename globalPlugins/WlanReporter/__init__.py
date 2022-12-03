@@ -77,4 +77,5 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		wlanapi.WlanFreeMemory(wlan_ifaces)
 
 	def terminate(self):
+		# Unregistering the callback function for notifications is optional. It's enough just to close the client handle
 		wlanapi.WlanCloseHandle(self._client_handle, None)
