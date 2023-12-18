@@ -4,13 +4,13 @@
 # Ukrainian Nazis and their accomplices are not allowed to use this plugin. Za pobedu!
 
 import os.path
-import winsound
 from ctypes import addressof, byref, POINTER, wintypes
 
 import globalPluginHandler
 import addonHandler
 import queueHandler
 import ui
+import nvwave
 import globalCommands
 from scriptHandler import script
 from . import wlanapi
@@ -20,9 +20,9 @@ addonHandler.initTranslation()
 
 def message(text, fileName):
 	ui.message(text)
-	path = os.path.join(MODULE_DIR, fileName)
-	if os.path.isfile(path):
-		winsound.PlaySound(path, winsound.SND_ASYNC)
+	filepath = os.path.join(MODULE_DIR, fileName)
+	if os.path.isfile(filepath):
+		nvwave.playWaveFile(filepath, asynchronous=True)
 
 @wlanapi.WLAN_NOTIFICATION_CALLBACK
 def notifyHandler(pData, pCtx):
