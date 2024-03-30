@@ -25,7 +25,7 @@ addon_info = {
 	# Translators: Long description to be shown for this add-on on add-on information from add-ons manager
 	"addon_description": _("""Reports the status of the wireless network"""),
 	# version
-	"addon_version": "2023.12.18",
+	"addon_version": "2024.03.30",
 	# Author(s)
 	"addon_author": "Kvark <kvark128@yandex.ru>",
 	# URL for the add-on documentation support
